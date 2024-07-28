@@ -35,10 +35,9 @@ for metadata_id in metadata_ids:
 
 conn.close()
 
-sheet.cell(row=6, column=2, value=data['日時'])
-
 for index, data in enumerate(new_data):
     row_num = 1 + index
-    sheet.cell(row=6, column=row_num, value=data['電力積算値'])  # C列に電力積算値
+    sheet.cell(row=5, column=2, value=data['日時'])
+    sheet.cell(row=5, column=row_num, value=data['電力積算値'])  # C列に電力積算値
 
 workbook.save(csv_file)
