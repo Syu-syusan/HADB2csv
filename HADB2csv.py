@@ -1,6 +1,7 @@
 import sqlite3
 import pandas as pd
 from datetime import datetime
+import openpyxl
 
 conn = sqlite3.connect('/usr/share/hassio/homeassistant/home-assistant_v2.db')
 cursor = conn.cursor()
@@ -12,42 +13,41 @@ current_timestamp = current_time.replace(minute=(current_time.minute // 30) * 30
 
 csv_file = './test.xlsx'
 
-df_existing = pd.read_excel(csv_file, skiprows=2)
+# Excelファイルを読み込む
+workbook = openpyxl.load_workbook(csv_file)
+sheet = workbook.active
 
+# 既存のExcelファイルの最後の行を取得
+last_row = sheet.max_row
+
+# 新規データのリスト
 new_data = []
 
+# 各metadata_idごとにデータを取得し、リストに追加
 for metadata_id in metadata_ids:
-    query = f"SELECT * FROM statistics_short_term WHERE metadata_id = {metadata_id}"
+    query = f"SELECT * FROM statistics_short_term WHERE metadata_id = {metadata_id} limit 1"
     cursor.execute(query)
     rows = cursor.fetchall()
 
+    # データが存在する場合のみ処理
     if rows:
         for row in rows:
+            # 8個目のカラムのデータを辞書形式に変換
             data = {
                 "日時": current_timestamp,
-                "value": row[7]
+                "電力積算値": row[7]
             }
             new_data.append(data)
 
-df_new = pd.DataFrame(new_data)
-
-df_combined = pd.concat([df_existing, df_new], ignore_index=True)
-
-with pd.ExcelWriter(csv_file, engine='xlsxwriter') as writer:
-    df_combined.to_excel(writer, index=False, startrow=3)
-
-    workbook  = writer.book
-    worksheet = writer.sheets['Sheet1']
-    
-    worksheet.write(0, 0, '稼働日/休日')
-    worksheet.write(1, 0, '合計 / ■30分値')
-    worksheet.write(2, 0, '■日時')
-    headers = ["バンドソーHBA520AU（WH01-1）", "バンドソーHBA420AU（WH01-2）",
-               "バンドソーHFA300（WH02）", "コンプレッサー（WH04）", "冷却器（WH10）",
-               "切削機(WH11)", "コンプレッサー（WH03）", "ローリングミル",
-               "油圧ポンプNo1&No2", "油圧ポンプNo3&No4", "油圧ポンプNo5&No6",
-               "ローリングミル（大）", "受電パルス"]
-    for col_num, header in enumerate(headers, 1):
-        worksheet.write(2, col_num, header)
-
+# SQLite接続を閉じる
 conn.close()
+
+# 既存のデータフレームに新規データを追加
+for index, data in enumerate(new_data):
+    row_num = last_row + 1 + index
+    sheet.cell(row=row_num, column=2, value=data['日時'])  # B列に日時
+    sheet.cell(row=row_num, column=3, value=data['電力積算値'])  # C列に電力積算値
+    # 必要に応じて他の列にもデータを追加
+
+# 新しいデータを含むExcelファイルを書き込む
+workbook.save(csv_file)
