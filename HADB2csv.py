@@ -36,9 +36,10 @@ conn.close()
 
 print(new_data)
 
-sheet.cell(row=5, column=1, value=new_data[0]['日時'])
+sheet.cell(row=5, column=1, value=new_data[1]['日時'])
+
+row_num = 1
 for index, data in enumerate(new_data):
-    row_num = 1 + index
-    sheet.cell(row=5, column=row_num, value=data['電力積算値'])
+    sheet.cell(row=5, column=row_num + 1, value=data['電力積算値'])
 
 workbook.save(csv_file)
