@@ -37,7 +37,7 @@ def main():
                 }
                 new_data.append(data)
 
-    sheet.cell(row=row_num+1, column=1, value=new_data[1]['日時'])
+    sheet.cell(row=row_num, column=1, value=new_data[1]['日時'])
 
     sheet.cell(row=row_num, column=2, value=new_data[0]['電力積算値'])
     sheet.cell(row=row_num, column=3, value=new_data[1]['電力積算値'])
