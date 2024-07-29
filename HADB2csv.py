@@ -34,24 +34,22 @@ for metadata_id in metadata_ids:
 
 conn.close()
 
-print(new_data)
-
 sheet.cell(row=5, column=1, value=new_data[1]['日時'])
 
 row_num = 1
 
 sheet.cell(row=5, column=row_num + 1, value=new_data[0]['電力積算値'])
-sheet.cell(row=5, column=row_num + 1, value=new_data[1]['電力積算値'])
-sheet.cell(row=5, column=row_num + 1, value=new_data[2]['電力積算値'])
-sheet.cell(row=5, column=row_num + 1, value=new_data[3]['電力積算値'])
-sheet.cell(row=5, column=row_num + 1, value=new_data[4]['電力積算値'])
-sheet.cell(row=5, column=row_num + 1, value=new_data[5]['電力積算値'])
-sheet.cell(row=5, column=row_num + 1, value=new_data[6]['電力積算値'])
-sheet.cell(row=5, column=row_num + 1, value=new_data[7]['電力積算値'])
-sheet.cell(row=5, column=row_num + 1, value=new_data[8]['電力積算値'])
-sheet.cell(row=5, column=row_num + 1, value=new_data[9]['電力積算値'])
-sheet.cell(row=5, column=row_num + 1, value=new_data[10]['電力積算値'])
-sheet.cell(row=5, column=row_num + 1, value=new_data[11]['電力積算値'])
-sheet.cell(row=5, column=row_num + 1, value=new_data[12]['電力積算値'])
+sheet.cell(row=5, column=row_num + 2, value=new_data[1]['電力積算値'])
+sheet.cell(row=5, column=row_num + 3, value=new_data[2]['電力積算値'])
+sheet.cell(row=5, column=row_num + 4, value=new_data[3]['電力積算値'])
+sheet.cell(row=5, column=row_num + 5, value=new_data[4]['電力積算値'])
+sheet.cell(row=5, column=row_num + 6, value=new_data[5]['電力積算値'])
+sheet.cell(row=5, column=row_num + 7, value=new_data[6]['電力積算値'])
+sheet.cell(row=5, column=row_num + 8, value=new_data[7]['電力積算値'])
+sheet.cell(row=5, column=row_num + 9, value=new_data[8]['電力積算値'])
+sheet.cell(row=5, column=row_num + 10, value=new_data[9]['電力積算値'])
+sheet.cell(row=5, column=row_num + 11, value=new_data[10]['電力積算値'])
+sheet.cell(row=5, column=row_num + 12, value=new_data[11]['電力積算値'])
+sheet.cell(row=5, column=row_num + 13, value=new_data[12]['電力積算値'])
 
 workbook.save(csv_file)
