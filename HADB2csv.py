@@ -60,7 +60,7 @@ if __name__ == '__main__':
     try:
         while True:
             now = datetime.now()
-            if now.minute == 58 or now.minute == 59:
+            if now.minute == 18 or now.minute == 19:
                 main()
             next_minute = now.replace(second=0, microsecond=0) + timedelta(minutes=1)
             sleep_time = (next_minute - now).total_seconds()
