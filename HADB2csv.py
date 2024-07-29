@@ -13,7 +13,7 @@ def job():
     current_time = datetime.now()
     current_timestamp = current_time.replace(minute=(current_time.minute // 30) * 30, second=0, microsecond=0)
 
-    csv_file = './test.csv'
+    csv_file = './test.xlsx'
 
     workbook = openpyxl.load_workbook(csv_file)
     sheet = workbook.active
@@ -36,10 +36,10 @@ def job():
                 new_data.append(data)
 
     conn.close()
+    
+    row_num = 5
 
     sheet.cell(row=row_num+1, column=1, value=new_data[1]['日時'])
-
-    row_num = 5
 
     sheet.cell(row=row_num+1, column=2, value=new_data[0]['電力積算値'])
     sheet.cell(row=row_num+1, column=3, value=new_data[1]['電力積算値'])
