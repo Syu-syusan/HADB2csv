@@ -11,7 +11,7 @@ MQTT_TOPIC = "haudi/hass/h7Me1xrJrxNS-DXDsKmOFg/HADB2csv"
 
 DB_PATH = "/usr/share/hassio/homeassistant/home-assistant_v2.db"
 
-META_IDS = [15, 16, 12, 13, 17, 18, 19, 42, 43, 44, 45, 46, 54]
+METADATA_IDS = [15, 16, 12, 13, 17, 18, 19, 42, 43, 44, 45, 46, 54]
 NAME = ["バンドソーHBA520AU（WH01-1）","バンドソーHBA420AU（WH01-2）","バンドソーHFA300（WH02）","コンプレッサー（WH04）","冷却器（WH10）","切削機(WH11)","コンプレッサー（WH03）","ローリングミル","油圧ポンプNo1&No2","油圧ポンプNo3&No4","油圧ポンプNo5&No6","ローリングミル（大）","受電パルス"]
 
 CSV_FILE_PATH = "output.csv"
@@ -27,8 +27,8 @@ def fetch_data(start_ts, end_ts):
         FROM statistics 
         WHERE metadata_id IN ({seq}) 
         AND created_ts BETWEEN ? AND ?
-    """.format(seq=','.join(['?']*len(META_IDS)))
-    params = META_IDS + [start_ts, end_ts]
+    """.format(seq=','.join(['?']*len(METADATA_IDS)))
+    params = METADATA_IDS + [start_ts, end_ts]
     cursor.execute(query, params)
     data = cursor.fetchall()
     cursor.close()
@@ -57,7 +57,7 @@ def write_to_csv(data):
         header = ['日時'] + NAME
         writer.writerow(header)
         for timestamp, values in sorted(sorted_data.items()):
-            row = [timestamp] + [values.get(meta_id, 0) for meta_id in META_IDS]
+            row = [timestamp] + [values.get(meta_id, 0) for meta_id in METADATA_IDS]
             writer.writerow(row)
 
 def on_message(client, userdata, msg):
