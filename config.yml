@@ -1,0 +1,4 @@
+mqtt:
+  host: 192.168.11.20
+  port: 1883
+  topic: haudi/hass/h7Me1xrJrxNS-DXDsKmOFg/HADB2csv/time
