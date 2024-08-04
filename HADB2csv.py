@@ -14,7 +14,7 @@ DB_PATH = "/usr/share/hassio/homeassistant/home-assistant_v2.db"
 METADATA_IDS = [15, 16, 12, 13, 17, 18, 19, 42, 43, 44, 45, 46, 54]
 NAME = ["バンドソーHBA520AU（WH01-1）","バンドソーHBA420AU（WH01-2）","バンドソーHFA300（WH02）","コンプレッサー（WH04）","冷却器（WH10）","切削機(WH11)","コンプレッサー（WH03）","ローリングミル","油圧ポンプNo1&No2","油圧ポンプNo3&No4","油圧ポンプNo5&No6","ローリングミル（大）","受電パルス"]
 
-CSV_FILE_PATH = "output.csv"
+CSV_FILE_PATH = "/usr/share/hassio/homeassistant/www/output.csv"
 
 def connect_database():
     return sqlite3.connect(DB_PATH)
