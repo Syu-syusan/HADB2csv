@@ -75,11 +75,16 @@ def on_message(client, userdata, msg):
         # ファイル名をMQTTメッセージのタイムスタンプに基づいて作成
         start_date = datetime.strptime(start_str, '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y%m%d')
         end_date = datetime.strptime(end_str, '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%m%d')
-        csv_filename = f"/usr/share/hassio/homeassistant/www/{start_date}-{end_date}.csv"
-        write_to_csv(data, csv_filename)
+        csv_filename = f"output_{start_date}-{end_date}.csv"
+        csv_filepath = f"/usr/share/hassio/homeassistant/www/{csv_filename}"
+        write_to_csv(data, csv_filepath)
         
         # ファイル名をログに出力
-        print(f"CSV file created: {csv_filename}")
+        print(f"CSV file created: {csv_filepath}")
+        
+        # MQTTメッセージを送信してファイル名を更新
+        client.publish(MQTT_UPDATE_TOPIC, csv_filename)
+        
     except json.JSONDecodeError as e:
         print(f"JSON decode error: {e}")
     except Exception as e:
