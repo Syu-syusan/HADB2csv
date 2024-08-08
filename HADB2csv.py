@@ -40,14 +40,16 @@ def unix_to_rounded_jst_datetime(ts):
 
 def calculate_difference(current_row, previous_row):
     # 現在の行と前の行の9番目のカラムの差分を計算
-    if previous_row is None:
-        return 0  # 前の行が存在しない場合は差分を0にする
+    if previous_row is None or len(current_row) < 9 or len(previous_row) < 9:
+        return 0  # 前の行が存在しない場合やカラム数が不足している場合は差分を0にする
     return current_row[8] - previous_row[8]
 
 def write_to_csv(data, file_path):
     sorted_data = {}
     previous_row = None
     for row in data:
+        if len(row) < 9:
+            continue  # カラム数が不足している場合はスキップ
         timestamp = unix_to_rounded_jst_datetime(row[0])
         meta_id = row[1]
         state = calculate_difference(row, previous_row)  # 差分を計算
