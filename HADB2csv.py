@@ -21,7 +21,7 @@ def fetch_data(start_ts, end_ts):
     cursor = connection.cursor()
     # 指定範囲よりも1時間前のデータも取得するようにクエリを調整
     query = """
-        SELECT created_ts, metadata_id, column_8, column_9 
+        SELECT created_ts, metadata_id, state, sum 
         FROM statistics 
         WHERE metadata_id IN ({seq}) 
         AND created_ts BETWEEN ? AND ?
