@@ -83,7 +83,7 @@ def on_message(client, userdata, msg):
         print(f"CSV file created: {csv_filepath}")
         
         # MQTTメッセージを送信してファイル名を更新
-        client.publish(haudi/hass/h7Me1xrJrxNS-DXDsKmOFg/latest_csv_filename, csv_filename)
+        client.publish("haudi/hass/h7Me1xrJrxNS-DXDsKmOFg/latest_csv_filename", csv_filename)
         
     except json.JSONDecodeError as e:
         print(f"JSON decode error: {e}")
