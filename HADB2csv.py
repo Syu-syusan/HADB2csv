@@ -2,7 +2,6 @@ import paho.mqtt.client as mqtt
 import sqlite3
 import csv
 from datetime import datetime, timezone, timedelta
-import time
 import json
 
 MQTT_BROKER = "192.168.11.20"
@@ -39,16 +38,39 @@ def unix_to_rounded_jst_datetime(ts):
     dt = dt.replace(second=0, microsecond=0)  # 秒を丸める
     return dt.strftime('%Y-%m-%d %H:%M:%S')
 
+def calculate_difference(current_value, previous_value):
+    return current_value - previous_value
+
 def write_to_csv(data, file_path):
     sorted_data = {}
+    previous_values = {}
+
     for row in data:
         timestamp = unix_to_rounded_jst_datetime(row[0])
         meta_id = row[1]
-        state = row[2]
+        current_value = row[2]
+
+        # 1時間前のタイムスタンプを計算
+        previous_timestamp = (datetime.fromtimestamp(row[0], timezone.utc) - timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')
+
+        # 前のタイムスタンプの値が存在するかを確認し、差分を計算
+        if previous_timestamp in previous_values:
+            previous_value = previous_values[previous_timestamp].get(meta_id, 0)
+            state = calculate_difference(current_value, previous_value)
+        else:
+            state = 0  # 前のタイムスタンプが存在しない場合は0を設定
+
+        # 現在の値を保存して次の差分計算に使用
+        if timestamp not in previous_values:
+            previous_values[timestamp] = {}
+        previous_values[timestamp][meta_id] = current_value
+
+        # CSVに書き込むデータを保存
         if timestamp not in sorted_data:
             sorted_data[timestamp] = {}
         sorted_data[timestamp][meta_id] = state
 
+    # CSVファイルに書き込み
     with open(file_path, mode='w', newline='') as file:
         writer = csv.writer(file)
         for _ in range(3):
