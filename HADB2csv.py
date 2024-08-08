@@ -14,8 +14,6 @@ DB_PATH = "/usr/share/hassio/homeassistant/home-assistant_v2.db"
 METADATA_IDS = [15, 16, 12, 13, 17, 18, 19, 42, 43, 44, 45, 46, 54]
 NAME = ["バンドソーHBA520AU（WH01-1）","バンドソーHBA420AU（WH01-2）","バンドソーHFA300（WH02）","コンプレッサー（WH04）","冷却器（WH10）","切削機(WH11)","コンプレッサー（WH03）","ローリングミル","油圧ポンプNo1&No2","油圧ポンプNo3&No4","油圧ポンプNo5&No6","ローリングミル（大）","受電パルス"]
 
-CSV_FILE_PATH = "/usr/share/hassio/homeassistant/www/output.csv"
-
 def connect_database():
     return sqlite3.connect(DB_PATH)
 
@@ -41,7 +39,7 @@ def unix_to_rounded_jst_datetime(ts):
     dt = dt.replace(second=0, microsecond=0)  # 秒を丸める
     return dt.strftime('%Y-%m-%d %H:%M:%S')
 
-def write_to_csv(data):
+def write_to_csv(data, file_path):
     sorted_data = {}
     for row in data:
         timestamp = unix_to_rounded_jst_datetime(row[0])
@@ -51,7 +49,7 @@ def write_to_csv(data):
             sorted_data[timestamp] = {}
         sorted_data[timestamp][meta_id] = state
 
-    with open(CSV_FILE_PATH, mode='w', newline='') as file:
+    with open(file_path, mode='w', newline='') as file:
         writer = csv.writer(file)
         for _ in range(3):
             writer.writerow([])
@@ -73,7 +71,14 @@ def on_message(client, userdata, msg):
         start_ts -= 9 * 3600
         end_ts -= 9 * 3600
         data = fetch_data(start_ts, end_ts)
-        write_to_csv(data)
+        
+        # ファイル名をMQTTメッセージのタイムスタンプに基づいて作成
+        timestamp_for_filename = datetime.now().strftime('%Y%m%d%H%M%S')
+        csv_filename = f"/usr/share/hassio/homeassistant/www/output_{timestamp_for_filename}.csv"
+        write_to_csv(data, csv_filename)
+        
+        # ファイル名をログに出力
+        print(f"CSV file created: {csv_filename}")
     except json.JSONDecodeError as e:
         print(f"JSON decode error: {e}")
     except Exception as e:
