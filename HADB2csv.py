@@ -73,8 +73,9 @@ def on_message(client, userdata, msg):
         data = fetch_data(start_ts, end_ts)
         
         # ファイル名をMQTTメッセージのタイムスタンプに基づいて作成
-        timestamp_for_filename = datetime.now().strftime('%Y%m%d%H%M%S')
-        csv_filename = f"/usr/share/hassio/homeassistant/www/output_{timestamp_for_filename}.csv"
+        start_date = datetime.strptime(start_str, '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%Y%m%d')
+        end_date = datetime.strptime(end_str, '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%m%d')
+        csv_filename = f"/usr/share/hassio/homeassistant/www/{start_date}-{end_date}.csv"
         write_to_csv(data, csv_filename)
         
         # ファイル名をログに出力
