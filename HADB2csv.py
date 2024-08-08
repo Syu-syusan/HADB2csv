@@ -12,7 +12,7 @@ MQTT_TOPIC = "haudi/hass/h7Me1xrJrxNS-DXDsKmOFg/HADB2csv"
 DB_PATH = "/usr/share/hassio/homeassistant/home-assistant_v2.db"
 
 METADATA_IDS = [15, 16, 12, 13, 17, 18, 19, 42, 43, 44, 45, 46, 54]
-NAME = ["バンドソーHBA520AU（WH01-1）","バンドソーHBA420AU（WH01-2）","バンドソーHFA300（WH02）","コンプレッサー（WH04）","冷却器（WH10）","切削機(WH11)","コンプレッサー（WH03）","ローリングミル","油圧ポンプNo1&No2","油圧ポンプNo3&No4","油圧ポンプNo5&No6","ローリングミル（大）","受電パルス"]
+NAME = ["バンドソーHBA520AU（WH01-1）","バンドソーHBA420AU（WH01-2）","バンドソーHFA300（WH02）","コンプレッサー（WH04）","冷却器（WH10）","切削機(WH11)","$
 
 CSV_FILE_PATH = "/usr/share/hassio/homeassistant/www/output.csv"
 
@@ -36,6 +36,7 @@ def fetch_data(start_ts, end_ts):
     return data
 
 def unix_to_rounded_jst_datetime(ts):
+    # データベースのタイムスタンプがUTCであることを前提とし、JSTに変換
     dt = datetime.fromtimestamp(ts, timezone.utc) + timedelta(hours=9)
     dt = dt.replace(second=0, microsecond=0)  # 秒を丸める
     return dt.strftime('%Y-%m-%d %H:%M:%S')
@@ -69,6 +70,8 @@ def on_message(client, userdata, msg):
         end_str = message['end']
         start_ts = int(datetime.strptime(start_str, '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).timestamp())
         end_ts = int(datetime.strptime(end_str, '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).timestamp())
+        start_ts -= 9 * 3600
+        end_ts -= 9 * 3600
         data = fetch_data(start_ts, end_ts)
         write_to_csv(data)
     except json.JSONDecodeError as e:
