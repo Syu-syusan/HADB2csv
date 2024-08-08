@@ -2,7 +2,6 @@ import paho.mqtt.client as mqtt
 import sqlite3
 import csv
 from datetime import datetime, timezone, timedelta
-import time
 import json
 
 MQTT_BROKER = "192.168.11.20"
@@ -39,12 +38,20 @@ def unix_to_rounded_jst_datetime(ts):
     dt = dt.replace(second=0, microsecond=0)  # 秒を丸める
     return dt.strftime('%Y-%m-%d %H:%M:%S')
 
+def calculate_difference(current_row, previous_row):
+    # 現在の行と前の行の9番目のカラムの差分を計算
+    if previous_row is None:
+        return 0  # 前の行が存在しない場合は差分を0にする
+    return current_row[8] - previous_row[8]
+
 def write_to_csv(data, file_path):
     sorted_data = {}
+    previous_row = None
     for row in data:
         timestamp = unix_to_rounded_jst_datetime(row[0])
         meta_id = row[1]
-        state = row[2]
+        state = calculate_difference(row, previous_row)  # 差分を計算
+        previous_row = row  # 現在の行を次のループで使用するために保存
         if timestamp not in sorted_data:
             sorted_data[timestamp] = {}
         sorted_data[timestamp][meta_id] = state
