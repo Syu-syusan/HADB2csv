@@ -21,7 +21,7 @@ def fetch_data(start_ts, end_ts):
     cursor = connection.cursor()
     # 指定範囲よりも1時間前のデータも取得するようにクエリを調整
     query = """
-        SELECT created_ts, metadata_id, column_8, column_9 
+        SELECT created_ts, metadata_id, column_9 
         FROM statistics 
         WHERE metadata_id IN ({seq}) 
         AND created_ts BETWEEN ? AND ?
@@ -51,7 +51,7 @@ def write_to_csv(data, file_path, start_ts):
     for row in data:
         timestamp = unix_to_rounded_jst_datetime(row[0])
         meta_id = row[1]
-        current_value = row[3]  # 9番目のカラムの値
+        current_value = row[2]  # 9番目のカラムの値
 
         # データが指定範囲よりも前かどうかをチェック
         if row[0] < start_ts:
