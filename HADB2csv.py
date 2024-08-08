@@ -19,13 +19,16 @@ def connect_database():
 def fetch_data(start_ts, end_ts):
     connection = connect_database()
     cursor = connection.cursor()
+    # 指定範囲よりも1時間前のデータも取得するようにクエリを調整
     query = """
         SELECT created_ts, metadata_id, state 
         FROM statistics 
         WHERE metadata_id IN ({seq}) 
         AND created_ts BETWEEN ? AND ?
+        ORDER BY created_ts ASC
     """.format(seq=','.join(['?']*len(METADATA_IDS)))
-    params = METADATA_IDS + [start_ts, end_ts]
+    # 1時間前のデータも取得するために、開始時間を1時間引いてクエリに渡す
+    params = METADATA_IDS + [start_ts - 3600, end_ts]
     cursor.execute(query, params)
     data = cursor.fetchall()
     cursor.close()
@@ -41,7 +44,7 @@ def unix_to_rounded_jst_datetime(ts):
 def calculate_difference(current_value, previous_value):
     return current_value - previous_value
 
-def write_to_csv(data, file_path):
+def write_to_csv(data, file_path, start_ts):
     sorted_data = {}
     previous_values = {}
 
@@ -50,20 +53,17 @@ def write_to_csv(data, file_path):
         meta_id = row[1]
         current_value = row[2]
 
-        # 1時間前のタイムスタンプを計算
-        previous_timestamp = (datetime.fromtimestamp(row[0], timezone.utc) - timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')
+        # データが指定範囲よりも前かどうかをチェック
+        if row[0] < start_ts:
+            previous_values[meta_id] = current_value
+            continue
 
-        # 前のタイムスタンプの値が存在するかを確認し、差分を計算
-        if previous_timestamp in previous_values:
-            previous_value = previous_values[previous_timestamp].get(meta_id, 0)
-            state = calculate_difference(current_value, previous_value)
-        else:
-            state = 0  # 前のタイムスタンプが存在しない場合は0を設定
+        # 1つ前のデータが存在する場合に差分を計算
+        previous_value = previous_values.get(meta_id, current_value)
+        state = calculate_difference(current_value, previous_value)
 
         # 現在の値を保存して次の差分計算に使用
-        if timestamp not in previous_values:
-            previous_values[timestamp] = {}
-        previous_values[timestamp][meta_id] = current_value
+        previous_values[meta_id] = current_value
 
         # CSVに書き込むデータを保存
         if timestamp not in sorted_data:
@@ -99,7 +99,7 @@ def on_message(client, userdata, msg):
         end_date = datetime.strptime(end_str, '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%m%d')
         csv_filename = f"output_{start_date}-{end_date}.csv"
         csv_filepath = f"/usr/share/hassio/homeassistant/www/{csv_filename}"
-        write_to_csv(data, csv_filepath)
+        write_to_csv(data, csv_filepath, start_ts)
         
         # ファイル名をログに出力
         print(f"CSV file created: {csv_filepath}")
