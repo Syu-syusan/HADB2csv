@@ -80,6 +80,19 @@ def write_to_csv(data, file_path, start_ts):
             row = [timestamp] + [values.get(meta_id, 0) for meta_id in METADATA_IDS]
             writer.writerow(row)
 
+def shorten_url(url):
+    api_url = "https://is.gd/create.php"
+        params = {
+            "format": "simple",
+            "url": url
+        }
+        response = requests.get(api_url, params=params)
+        
+        if response.status_code == 200:
+            return response.text
+        else:
+            return None
+    
 def on_message(client, userdata, msg):
     try:
         print(f"Received message: {msg.payload.decode()}")
@@ -103,9 +116,11 @@ def on_message(client, userdata, msg):
         # ファイル名をログに出力
         print(f"CSV file created: {csv_filepath}")
         
+        long_url = "https://familia-a126c8.haudi.app/local/" + csv_filename
+        short_url = shorten_url(long_url)
+
         # MQTTメッセージを送信してファイル名を更新
-        client.publish("haudi/hass/h7Me1xrJrxNS-DXDsKmOFg/latest_csv_filename", "/local/"+csv_filename)
-        
+        client.publish("haudi/hass/h7Me1xrJrxNS-DXDsKmOFg/latest_csv_filename", short_url)
     except json.JSONDecodeError as e:
         print(f"JSON decode error: {e}")
     except Exception as e:
