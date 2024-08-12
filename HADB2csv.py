@@ -20,6 +20,7 @@ def connect_database():
 def fetch_data(start_ts, end_ts):
     connection = connect_database()
     cursor = connection.cursor()
+    # start_tsからend_tsのデータを取得（1時間前のデータは取得しない）
     query = """
         SELECT created_ts, metadata_id, state, sum 
         FROM statistics 
@@ -50,6 +51,7 @@ def write_to_csv(data, file_path):
         # 出力するタイムスタンプを1時間前にシフト
         timestamp = unix_to_rounded_jst_datetime(row[0] - 3600)
         meta_id = row[1]
+        current_value = row[3]  # sumの値
 
         # 1つ前のデータが存在する場合に差分を計算
         previous_value = previous_values.get(meta_id, current_value)
@@ -94,7 +96,7 @@ def on_message(client, userdata, msg):
         start_str = message['start']
         end_str = message['end']
         start_ts = int(datetime.strptime(start_str, '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).timestamp())
-        end_ts = int(datetime.strptime(end_str, '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).timestamp())
+        end_ts = int(datetime.strptime(end_str, '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).timestamp()) + 3600
         start_ts -= 9 * 3600
         end_ts -= 9 * 3600
         data = fetch_data(start_ts, end_ts)
