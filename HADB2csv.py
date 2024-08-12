@@ -96,7 +96,7 @@ def on_message(client, userdata, msg):
         start_str = message['start']
         end_str = message['end']
         start_ts = int(datetime.strptime(start_str, '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).timestamp())
-        end_ts = int(datetime.strptime(end_str, '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).timestamp())
+        end_ts = int(datetime.strptime(end_str, '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc).timestamp()) + 3600
         start_ts -= 9 * 3600
         end_ts -= 9 * 3600
         data = fetch_data(start_ts, end_ts)
