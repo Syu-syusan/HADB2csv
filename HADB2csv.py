@@ -3,6 +3,7 @@ import sqlite3
 import csv
 from datetime import datetime, timezone, timedelta
 import json
+import requests
 
 MQTT_BROKER = "192.168.11.20"
 MQTT_PORT = 1883
