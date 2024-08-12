@@ -87,7 +87,22 @@ def shorten_url(url):
         return response.text
     else:
         return None
+
+def remove_5th_row_and_shift(csv_filepath):
+    # 一時的にファイルを読み込み、すべての行をリストに格納
+    with open(csv_filepath, mode='r', newline='') as file:
+        reader = csv.reader(file)
+        rows = list(reader)
     
+    # 5行目を削除
+    if len(rows) >= 5:
+        del rows[4]  # 5行目はインデックス4に対応
+    
+    # 更新された内容を再び同じファイルに書き込む
+    with open(csv_filepath, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(rows)
+
 def on_message(client, userdata, msg):
     try:
         print(f"Received message: {msg.payload.decode()}")
@@ -107,6 +122,9 @@ def on_message(client, userdata, msg):
         csv_filename = f"output_{start_date}-{end_date}.csv"
         csv_filepath = f"/usr/share/hassio/homeassistant/www/{csv_filename}"
         write_to_csv(data, csv_filepath)
+
+        csv_filepath = f"/usr/share/hassio/homeassistant/www/{csv_filename}"
+        remove_5th_row_and_shift(csv_filepath)
         
         # ファイル名をログに出力
         print(f"CSV file created: {csv_filepath}")
