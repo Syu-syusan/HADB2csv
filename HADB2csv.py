@@ -20,6 +20,7 @@ def connect_database():
 def fetch_data(start_ts, end_ts):
     connection = connect_database()
     cursor = connection.cursor()
+    # start_tsからend_tsのデータを取得（1時間前のデータは取得しない）
     query = """
         SELECT created_ts, metadata_id, state, sum 
         FROM statistics 
@@ -27,7 +28,6 @@ def fetch_data(start_ts, end_ts):
         AND created_ts BETWEEN ? AND ?
         ORDER BY created_ts ASC
     """.format(seq=','.join(['?']*len(METADATA_IDS)))
-    # 指定したstart_tsからend_tsの間だけを取得
     params = METADATA_IDS + [start_ts, end_ts]
     cursor.execute(query, params)
     data = cursor.fetchall()
