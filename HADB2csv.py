@@ -19,7 +19,6 @@ def connect_database():
 def fetch_data(start_ts, end_ts):
     connection = connect_database()
     cursor = connection.cursor()
-    # 指定範囲よりも1時間前のデータも取得するようにクエリを調整
     query = """
         SELECT created_ts, metadata_id, state, sum 
         FROM statistics 
@@ -27,7 +26,6 @@ def fetch_data(start_ts, end_ts):
         AND created_ts BETWEEN ? AND ?
         ORDER BY created_ts ASC
     """.format(seq=','.join(['?']*len(METADATA_IDS)))
-    # 1時間前のデータも取得するために、開始時間を1時間引いてクエリに渡す
     params = METADATA_IDS + [start_ts - 3600, end_ts]
     cursor.execute(query, params)
     data = cursor.fetchall()
@@ -49,9 +47,10 @@ def write_to_csv(data, file_path, start_ts):
     previous_values = {}
 
     for row in data:
-        timestamp = unix_to_rounded_jst_datetime(row[0])
+        # 出力するタイムスタンプを1時間前にシフト
+        timestamp = unix_to_rounded_jst_datetime(row[0] - 3600)
         meta_id = row[1]
-        current_value = row[3]  # 9番目のカラムの値
+        current_value = row[3]  # sumの値
 
         # データが指定範囲よりも前かどうかをチェック
         if row[0] < start_ts:
