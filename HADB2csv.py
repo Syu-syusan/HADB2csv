@@ -27,7 +27,7 @@ def fetch_data(start_ts, end_ts):
         AND created_ts BETWEEN ? AND ?
         ORDER BY created_ts ASC
     """.format(seq=','.join(['?']*len(METADATA_IDS)))
-    params = METADATA_IDS + [start_ts - 3600, end_ts]
+    params = METADATA_IDS + [start_ts, end_ts]  # ここではstart_tsをシフトせずにそのまま使用
     cursor.execute(query, params)
     data = cursor.fetchall()
     cursor.close()
@@ -43,20 +43,14 @@ def unix_to_rounded_jst_datetime(ts):
 def calculate_difference(current_value, previous_value):
     return current_value - previous_value
 
-def write_to_csv(data, file_path, start_ts):
+def write_to_csv(data, file_path):
     sorted_data = {}
     previous_values = {}
 
     for row in data:
-        # 出力するタイムスタンプを1時間前にシフト
-        timestamp = unix_to_rounded_jst_datetime(row[0] - 3600)
+        timestamp = unix_to_rounded_jst_datetime(row[0] - 3600)  # 出力するタイムスタンプを1時間前にシフト
         meta_id = row[1]
         current_value = row[3]  # sumの値
-
-        # データが指定範囲よりも前かどうかをチェック
-        if row[0] < start_ts:
-            previous_values[meta_id] = current_value
-            continue
 
         # 1つ前のデータが存在する場合に差分を計算
         previous_value = previous_values.get(meta_id, current_value)
@@ -112,7 +106,7 @@ def on_message(client, userdata, msg):
         end_date = datetime.strptime(end_str, '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%m%d')
         csv_filename = f"output_{start_date}-{end_date}.csv"
         csv_filepath = f"/usr/share/hassio/homeassistant/www/{csv_filename}"
-        write_to_csv(data, csv_filepath, start_ts)
+        write_to_csv(data, csv_filepath)
         
         # ファイル名をログに出力
         print(f"CSV file created: {csv_filepath}")
