@@ -45,18 +45,11 @@ def calculate_difference(current_value, previous_value):
 def write_to_csv(data, file_path):
     sorted_data = {}
     previous_values = {}
-    first_row_skipped = False  # 最初の行をスキップするためのフラグ
 
     for row in data:
         # 出力するタイムスタンプを1時間前にシフト
         timestamp = unix_to_rounded_jst_datetime(row[0] - 3600)
         meta_id = row[1]
-        current_value = row[3]  # sumの値
-
-        if not first_row_skipped:
-            previous_values[meta_id] = current_value  # 最初の行をスキップ
-            first_row_skipped = True
-            continue
 
         # 1つ前のデータが存在する場合に差分を計算
         previous_value = previous_values.get(meta_id, current_value)
