@@ -82,16 +82,16 @@ def write_to_csv(data, file_path, start_ts):
 
 def shorten_url(url):
     api_url = "https://is.gd/create.php"
-        params = {
-            "format": "simple",
-            "url": url
-        }
-        response = requests.get(api_url, params=params)
+    params = {
+        "format": "simple",
+        "url": url
+    }
+    response = requests.get(api_url, params=params)
         
-        if response.status_code == 200:
-            return response.text
-        else:
-            return None
+    if response.status_code == 200:
+        return response.text
+    else:
+        return None
     
 def on_message(client, userdata, msg):
     try:
