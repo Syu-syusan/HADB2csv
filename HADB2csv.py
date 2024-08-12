@@ -27,7 +27,7 @@ def fetch_data(start_ts, end_ts):
         AND created_ts BETWEEN ? AND ?
         ORDER BY created_ts ASC
     """.format(seq=','.join(['?']*len(METADATA_IDS)))
-    params = METADATA_IDS + [start_ts - 3600, end_ts]
+    params = METADATA_IDS + [start_ts - 3600, end_ts]  # 1時間前のデータも取得するためにstart_tsをシフト
     cursor.execute(query, params)
     data = cursor.fetchall()
     cursor.close()
@@ -47,7 +47,8 @@ def write_to_csv(data, file_path, start_ts):
     previous_values = {}
 
     for row in data:
-        timestamp = unix_to_rounded_jst_datetime(row[0])  # シフトなしの元のタイムスタンプ
+        # ここで1時間前にシフト
+        timestamp = unix_to_rounded_jst_datetime(row[0] - 3600)
         meta_id = row[1]
         current_value = row[3]  # sumの値
 
