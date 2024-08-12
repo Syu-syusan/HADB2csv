@@ -27,7 +27,7 @@ def fetch_data(start_ts, end_ts):
         AND created_ts BETWEEN ? AND ?
         ORDER BY created_ts ASC
     """.format(seq=','.join(['?']*len(METADATA_IDS)))
-    params = METADATA_IDS + [start_ts, end_ts]  # ここではstart_tsをシフトせずにそのまま使用
+    params = METADATA_IDS + [start_ts - 3600, end_ts]
     cursor.execute(query, params)
     data = cursor.fetchall()
     cursor.close()
@@ -35,22 +35,25 @@ def fetch_data(start_ts, end_ts):
     return data
 
 def unix_to_rounded_jst_datetime(ts):
-    # データベースのタイムスタンプがUTCであることを前提とし、JSTに変換
     dt = datetime.fromtimestamp(ts, timezone.utc) + timedelta(hours=9)
-    dt = dt.replace(second=0, microsecond=0)  # 秒を丸める
+    dt = dt.replace(second=0, microsecond=0)
     return dt.strftime('%Y-%m-%d %H:%M:%S')
 
 def calculate_difference(current_value, previous_value):
     return current_value - previous_value
 
-def write_to_csv(data, file_path):
+def write_to_csv(data, file_path, start_ts):
     sorted_data = {}
     previous_values = {}
 
     for row in data:
-        timestamp = unix_to_rounded_jst_datetime(row[0] - 3600)  # 出力するタイムスタンプを1時間前にシフト
+        timestamp = unix_to_rounded_jst_datetime(row[0])  # シフトなしの元のタイムスタンプ
         meta_id = row[1]
         current_value = row[3]  # sumの値
+
+        if row[0] < start_ts:  # 指定範囲より前のデータを保存
+            previous_values[meta_id] = current_value
+            continue
 
         # 1つ前のデータが存在する場合に差分を計算
         previous_value = previous_values.get(meta_id, current_value)
@@ -59,7 +62,6 @@ def write_to_csv(data, file_path):
         # 現在の値を保存して次の差分計算に使用
         previous_values[meta_id] = current_value
 
-        # CSVに書き込むデータを保存
         if timestamp not in sorted_data:
             sorted_data[timestamp] = {}
         sorted_data[timestamp][meta_id] = state
@@ -106,7 +108,7 @@ def on_message(client, userdata, msg):
         end_date = datetime.strptime(end_str, '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%m%d')
         csv_filename = f"output_{start_date}-{end_date}.csv"
         csv_filepath = f"/usr/share/hassio/homeassistant/www/{csv_filename}"
-        write_to_csv(data, csv_filepath)
+        write_to_csv(data, csv_filepath, start_ts)
         
         # ファイル名をログに出力
         print(f"CSV file created: {csv_filepath}")
