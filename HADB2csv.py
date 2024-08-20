@@ -20,7 +20,6 @@ def connect_database():
 def fetch_data(start_ts, end_ts):
     connection = connect_database()
     cursor = connection.cursor()
-    # start_tsからend_tsのデータを取得（1時間前のデータは取得しない）
     query = """
         SELECT created_ts, metadata_id, state, sum 
         FROM statistics 
@@ -48,6 +47,8 @@ def write_to_csv(data, file_path):
     previous_values = {}
     total_sums = {meta_id: 0 for meta_id in METADATA_IDS}  # 各列の総計を保持する辞書
 
+    row_index = 0  # 行インデックスを追跡
+
     for row in data:
         # 出力するタイムスタンプを1時間前にシフト
         timestamp = unix_to_rounded_jst_datetime(row[0] - 3600)
@@ -58,8 +59,9 @@ def write_to_csv(data, file_path):
         previous_value = previous_values.get(meta_id, current_value)
         state = calculate_difference(current_value, previous_value)
 
-        # 各列の総計に加算
-        total_sums[meta_id] += state
+        # 5行目以外を総計に加算
+        if row_index != 4:  # インデックスは0から始まるので、5行目はインデックス4
+            total_sums[meta_id] += state
 
         # 現在の値を保存して次の差分計算に使用
         previous_values[meta_id] = current_value
@@ -68,11 +70,13 @@ def write_to_csv(data, file_path):
             sorted_data[timestamp] = {}
         sorted_data[timestamp][meta_id] = state
 
+        row_index += 1  # 行インデックスをインクリメント
+
     # CSVファイルに書き込み
     with open(file_path, mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['稼働日/休日', '-'])  # リストの結合を修正
-        writer.writerow(['合計 / ■30分値', 'ポイント名'])  # リストの結合を修正
+        writer.writerow(['稼働日/休日', '-'])
+        writer.writerow(['合計 / ■30分値', 'ポイント名'])
         header = ['■日時'] + NAME
         writer.writerow(header)
         for timestamp, values in sorted(sorted_data.items()):
