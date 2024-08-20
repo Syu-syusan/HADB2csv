@@ -46,6 +46,7 @@ def calculate_difference(current_value, previous_value):
 def write_to_csv(data, file_path):
     sorted_data = {}
     previous_values = {}
+    total_sums = {meta_id: 0 for meta_id in METADATA_IDS}  # 各列の総計を保持する辞書
 
     for row in data:
         # 出力するタイムスタンプを1時間前にシフト
@@ -57,6 +58,9 @@ def write_to_csv(data, file_path):
         previous_value = previous_values.get(meta_id, current_value)
         state = calculate_difference(current_value, previous_value)
 
+        # 各列の総計に加算
+        total_sums[meta_id] += state
+
         # 現在の値を保存して次の差分計算に使用
         previous_values[meta_id] = current_value
 
@@ -67,13 +71,17 @@ def write_to_csv(data, file_path):
     # CSVファイルに書き込み
     with open(file_path, mode='w', newline='') as file:
         writer = csv.writer(file)
-        for _ in range(3):
-            writer.writerow([])
-        header = ['日時'] + NAME
+        writer.writerow(['稼働日/休日']) + (['-'])
+        writer.writerow(['合計 / ■30分値']) + (['ポイント名'])
+        header = ['■日時'] + NAME
         writer.writerow(header)
         for timestamp, values in sorted(sorted_data.items()):
             row = [timestamp] + [values.get(meta_id, 0) for meta_id in METADATA_IDS]
             writer.writerow(row)
+        
+        # 総計行を追加
+        total_row = ['総計'] + [total_sums[meta_id] for meta_id in METADATA_IDS]
+        writer.writerow(total_row)
 
 def shorten_url(url):
     api_url = "https://is.gd/create.php"
