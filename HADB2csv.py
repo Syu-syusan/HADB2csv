@@ -71,8 +71,8 @@ def write_to_csv(data, file_path):
     # CSVファイルに書き込み
     with open(file_path, mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['稼働日/休日']) + (['-'])
-        writer.writerow(['合計 / ■30分値']) + (['ポイント名'])
+        writer.writerow(['稼働日/休日', '-'])  # リストの結合を修正
+        writer.writerow(['合計 / ■30分値', 'ポイント名'])  # リストの結合を修正
         header = ['■日時'] + NAME
         writer.writerow(header)
         for timestamp, values in sorted(sorted_data.items()):
