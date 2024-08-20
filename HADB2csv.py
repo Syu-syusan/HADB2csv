@@ -100,15 +100,15 @@ def shorten_url(url):
     else:
         return None
 
-def remove_5th_row_and_shift(csv_filepath):
+def remove_4th_row_and_shift(csv_filepath):
     # 一時的にファイルを読み込み、すべての行をリストに格納
     with open(csv_filepath, mode='r', newline='') as file:
         reader = csv.reader(file)
         rows = list(reader)
     
-    # 5行目を削除
-    if len(rows) >= 5:
-        del rows[4]  # 5行目はインデックス4に対応
+    # 4行目を削除
+    if len(rows) >= 4:
+        del rows[3]  # 4行目はインデックス3に対応
     
     # 更新された内容を再び同じファイルに書き込む
     with open(csv_filepath, mode='w', newline='') as file:
