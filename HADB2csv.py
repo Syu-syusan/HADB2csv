@@ -136,7 +136,7 @@ def on_message(client, userdata, msg):
         write_to_csv(data, csv_filepath)
 
         csv_filepath = f"/usr/share/hassio/homeassistant/www/{csv_filename}"
-        remove_5th_row_and_shift(csv_filepath)
+        remove_4th_row_and_shift(csv_filepath)
         
         # ファイル名をログに出力
         print(f"CSV file created: {csv_filepath}")
