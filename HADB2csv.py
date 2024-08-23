@@ -76,6 +76,7 @@ def write_to_csv(data, file_path):
     with open(file_path, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['稼働日/休日', '-'])  # リストの結合を修正
+        writer.writerow([])
         writer.writerow(['合計 / ■30分値', 'ポイント名'])  # リストの結合を修正
         header = ['■日時'] + NAME
         writer.writerow(header)
@@ -100,15 +101,15 @@ def shorten_url(url):
     else:
         return None
 
-def remove_4th_row_and_shift(csv_filepath):
+def remove_5th_row_and_shift(csv_filepath):
     # 一時的にファイルを読み込み、すべての行をリストに格納
     with open(csv_filepath, mode='r', newline='') as file:
         reader = csv.reader(file)
         rows = list(reader)
     
     # 4行目を削除
-    if len(rows) >= 4:
-        del rows[3]  # 4行目はインデックス3に対応
+    if len(rows) >= 5:
+        del rows[4]  # 4行目はインデックス3に対応
     
     # 更新された内容を再び同じファイルに書き込む
     with open(csv_filepath, mode='w', newline='') as file:
@@ -136,7 +137,7 @@ def on_message(client, userdata, msg):
         write_to_csv(data, csv_filepath)
 
         csv_filepath = f"/usr/share/hassio/homeassistant/www/{csv_filename}"
-        remove_4th_row_and_shift(csv_filepath)
+        remove_5th_row_and_shift(csv_filepath)
         
         # ファイル名をログに出力
         print(f"CSV file created: {csv_filepath}")
