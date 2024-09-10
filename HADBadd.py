@@ -86,7 +86,7 @@ def fetch_and_insert_data():
             target_conn.close()
 
 # スケジュール設定
-schedule.every().hour.at(":58").do(fetch_and_insert_data)  # 毎時00分に実行
+schedule.every().hour.at(":59").do(fetch_and_insert_data)  # 毎時00分に実行
 schedule.every().hour.at(":30").do(fetch_and_insert_data)  # 毎時30分に実行
 
 # スケジュールを永続的に実行する
