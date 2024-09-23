@@ -52,7 +52,7 @@ def write_to_csv(data, file_path):
 
     for row in data:
         # 出力するタイムスタンプを1時間前にシフト
-        timestamp = unix_to_rounded_jst_datetime(row[0] + 5)  # 1時間(3600秒)前にシフトしている部分に65分を追加
+        timestamp = unix_to_rounded_jst_datetime(row[0] - 300)  # 1時間(3600秒)前にシフトしている部分に65分を追加
         meta_id = row[1]
         current_value = row[3]  # sumの値
 
